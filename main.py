@@ -1,4 +1,4 @@
-from customtkinter import *
+from customtkinter import CTk,CTkButton,CTkFrame,CTkLabel,CTkScrollableFrame,CTkEntry,CTkTextbox,LEFT,RIGHT
 import json
 
 class App:
@@ -12,15 +12,13 @@ class App:
 
 
     def save_text(self,title,content):
-      self.count = 0
-      if len(self.data) != 0:
-        self.count = int(len(self.data))
-      new_key = str(self.count)
+      new_key = str(max(map(int, self.data.keys()), default=-1) + 1)
       self.data[new_key] = {"title" : title , "content" : content}
       with open("data.json" , "w") as f:
         json.dump(self.data, f, indent=3)
       self.addnewbtn.destroy()
       self.frame_creator(new_key)
+      self.add_btn()
 
 
 
@@ -50,7 +48,7 @@ class App:
         self.is_changed = False
         titlebox = CTkLabel(self.allholder, 550, 75, text = title, font=("Helvetica", 32, "bold"))
         titlebox.pack()
-        contentbox = CTkLabel(self.allholder, 550, 400, text = content, font = ("sans-serif", 18))
+        contentbox = CTkLabel(self.allholder, 550, 455, text = content, font = ("sans-serif", 18))
         contentbox.pack(pady = 5)
 
 
@@ -84,6 +82,9 @@ class App:
       command = lambda k=key, fm=newframe: [fm.destroy(),self.delete_json(k)]
       )
       deletebtn.pack(side = RIGHT)
+
+
+    def add_btn(self):
       self.addnewbtn = CTkButton(
           self.framesholder,
           280,
@@ -105,6 +106,7 @@ def main():
     app = App(root,get_data())
     for key in app.data: 
       app.frame_creator(key)
+    app.add_btn()
     root.mainloop()
 
 
