@@ -1,8 +1,6 @@
 from customtkinter import *
 import json
 
-#make the add button public so that it is the only one that you have to change
-
 class App:
     def __init__(self,root,data):
         self.root = root
