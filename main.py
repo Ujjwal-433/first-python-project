@@ -1,29 +1,29 @@
 from customtkinter import *
 import json
 
-#add new method addframe and make the add button public so that it is the only one that you have to change
+#make the add button public so that it is the only one that you have to change
 
 class App:
     def __init__(self,root,data):
-        self.framesholder = CTkScrollableFrame(root, 280, 550)
-        self.framesholder.place(x = 0, y = 0)
         self.root = root
+        self.data = data
+        self.framesholder = CTkScrollableFrame(self.root, 280, 550)
+        self.framesholder.place(x = 0, y = 0)
         self.allholder = CTkFrame(self.root, 550, 550)
         self.allholder.place(x=300, y=5)
-        self.data = data
 
-    def add_frame():
-       pass
 
     def save_text(self,title,content):
       self.count = 0
       if len(self.data) != 0:
         self.count = int(len(self.data))
-      self.data[str(self.count)] = {"title" : title , "content" : content}
+      new_key = str(self.count)
+      self.data[new_key] = {"title" : title , "content" : content}
       with open("data.json" , "w") as f:
         json.dump(self.data, f, indent=3)
-      self.showcase_items(title,content)
-      self.frame_creator()
+      self.addnewbtn.destroy()
+      self.frame_creator(new_key)
+
 
 
     def add_items(self):
@@ -45,10 +45,11 @@ class App:
        savebtn.pack(pady = 2, padx = 100)
 
 
-    def showcase_items(self,title,content):
+    def handle_items(self,title,content):
         self.allholder.destroy()
         self.allholder = CTkFrame(self.root, 550, 550)
         self.allholder.place(x=300, y=5)
+        self.is_changed = False
         titlebox = CTkLabel(self.allholder, 550, 75, text = title, font=("Helvetica", 32, "bold"))
         titlebox.pack()
         contentbox = CTkLabel(self.allholder, 550, 400, text = content, font = ("sans-serif", 18))
@@ -61,38 +62,31 @@ class App:
         json.dump(self.data, f, indent=3)
 
 
-    def frame_creator(self):
-        self.framesholder.destroy()
-        self.framesholder = CTkScrollableFrame(self.root, 280, 550)
-        self.framesholder.place(x = 0, y = 0)
-        for i,key in enumerate(self.data, start=0):
-          newframe = CTkFrame(self.framesholder, 280, 50)
-          newframe.pack(pady = 1)
-
-          title = self.data[key]["title"]
-          content = self.data[key]["content"]
-          titlebtn = CTkButton(
-            newframe,
-            230,
-            50,
-            text=title,
-            command=lambda t=title, c=content: self.showcase_items(t, c)
-          )
-          titlebtn.pack(side=LEFT)
-
-          deletebtn = CTkButton(
-          newframe,
-          50,
-          50,
-          fg_color='#bb0000',
-          text='X',
-          font=("Helvetica", 20, "bold"),
-          hover_color='#ff0000',
-          command = lambda k=key, fm=newframe: [fm.destroy(),self.delete_json(k)]
-          )
-          deletebtn.pack(side = RIGHT)
-
-        addnewbtn = CTkButton(
+    def frame_creator(self, key):
+      newframe = CTkFrame(self.framesholder, 280, 50)
+      newframe.pack(pady = 1)
+      title = self.data[key]["title"]
+      content = self.data[key]["content"]
+      titlebtn = CTkButton(
+        newframe,
+        230,
+        50,
+        text=title,
+        command=lambda t=title, c=content: self.handle_items(t, c)
+      )
+      titlebtn.pack(side=LEFT)
+      deletebtn = CTkButton(
+      newframe,
+      50,
+      50,
+      fg_color='#bb0000',
+      text='X',
+      font=("Helvetica", 20, "bold"),
+      hover_color='#ff0000',
+      command = lambda k=key, fm=newframe: [fm.destroy(),self.delete_json(k)]
+      )
+      deletebtn.pack(side = RIGHT)
+      self.addnewbtn = CTkButton(
           self.framesholder,
           280,
           90,
@@ -102,7 +96,7 @@ class App:
           hover_color='#00ff00',
           command = lambda: self.add_items()
           )
-        addnewbtn.pack(pady = 1)
+      self.addnewbtn.pack(pady = 1)
 
 
 def main():
@@ -111,7 +105,8 @@ def main():
     root.title("Note for all")
     root.resizable(False,False)
     app = App(root,get_data())
-    app.frame_creator()
+    for key in app.data: 
+      app.frame_creator(key)
     root.mainloop()
 
 
